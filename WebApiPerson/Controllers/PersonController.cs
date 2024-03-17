@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiPerson.Context;
-using WebApiPerson.Models;
+using SharedLibrary.Models;
 
 namespace WebApiPerson.Controllers
 {
@@ -43,16 +38,26 @@ namespace WebApiPerson.Controllers
         }
 
         // PUT: api/Person/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPerson(int id, Person person)
         {
             if (id != person.Id)
             {
-                return BadRequest();
+                return BadRequest("The ID in the URL does not match the ID in the request body.");
             }
 
-            _context.Entry(person).State = EntityState.Modified;
+            var existingPerson = await _context.Persons.FindAsync(id);
+            if (existingPerson == null)
+            {
+                return NotFound("Person not found.");
+            }
+
+            if (person.Age < 20)
+            {
+                return BadRequest("Age must be 20 or higher.");
+            }
+
+            _context.Entry(existingPerson).CurrentValues.SetValues(person);
 
             try
             {
@@ -62,11 +67,11 @@ namespace WebApiPerson.Controllers
             {
                 if (!PersonExists(id))
                 {
-                    return NotFound();
+                    return NotFound("Person not found.");
                 }
                 else
                 {
-                    throw;
+                    throw; // InternalServerError
                 }
             }
 
@@ -74,14 +79,18 @@ namespace WebApiPerson.Controllers
         }
 
         // POST: api/Person
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Person>> PostPerson(Person person)
         {
+            if (person.Age < 20)
+            {
+                return BadRequest("Age must be 20 or higher.");
+            }
+
             _context.Persons.Add(person);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetPerson", new { id = person.Id }, person);
+            return CreatedAtAction(nameof(GetPerson), new { id = person.Id }, person);
         }
 
         // DELETE: api/Person/5

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebApiPerson.Models;
+using SharedLibrary.Models;
 
 namespace WebApiPerson.Context
 {

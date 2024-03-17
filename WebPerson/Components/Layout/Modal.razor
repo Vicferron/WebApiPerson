@@ -1,0 +1,52 @@
+﻿@using WebPerson.Client.Models
+
+@if (IsVisible)
+{
+    <div class="modal-custom">
+        <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header @HeaderClass">
+                        <h5 class="modal-title">@Title</h5>
+                        <div @onclick="CloseModal" style="cursor: pointer;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        @Message
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Message { get; set; } = string.Empty;
+
+    [Parameter]
+    public ModalType Type { get; set; }
+
+    private string HeaderClass => Type switch
+    {
+        ModalType.Success => "modal-header bg-success text-white",
+        ModalType.Error => "modal-header bg-danger text-white",
+        ModalType.Warning => "modal-header bg-warning text-dark",
+        _ => "modal-header bg-secondary text-white"
+    };
+
+    private void CloseModal()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+}
