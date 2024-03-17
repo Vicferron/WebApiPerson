@@ -1,0 +1,250 @@
+﻿@page "/person"
+@using WebPerson.Client.Components.Layout
+@using WebPerson.Client.Services
+@using SharedLibrary.Models
+@using WebPerson.Client.Models
+@inject IAPIController PersonService
+@rendermode InteractiveServer
+
+<PageTitle>PersonPage</PageTitle>
+
+<h1>PersonPage</h1>
+
+<Modal IsVisible="@ModalVisibility" Title="@ModalTitle" Message="@ModalMessage" Type="@TypeModal" />
+
+<div class="container">
+
+
+    @if (isLoading)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        <div class="mb-3">
+            <div class="mr-3 d-inline-block">
+                <button class="btn btn-success ml-3" @onclick="AddingNewPerson">
+                    Add new person
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-add" viewBox="0 0 16 16">
+                        <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0m-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0M8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
+                        <path d="M8.256 14a4.5 4.5 0 0 1-.229-1.004H3c.001-.246.154-.986.832-1.664C4.484 10.68 5.711 10 8 10q.39 0 .74.025c.226-.341.496-.65.804-.918Q8.844 9.002 8 9c-5 0-6 3-6 4s1 1 1 1z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th style="width: 10%;">Id</th>
+                        <th style="width: 40%;">Name</th>
+                        <th style="width: 20%;">Age</th>
+                        <th style="width: 30%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (isAddingNewPerson)
+                    {
+                        <tr>
+                            <td></td>
+                            <td><input @bind="newPerson.Name" class="form-control" /></td>
+                            <td><input @bind="newPerson.Age" class="form-control" /></td>
+                            <td>
+                                <button class="btn btn-success" @onclick="AddNewPerson">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-floppy2-fill" viewBox="0 0 16 16">
+                                        <path d="M12 2h-2v3h2z" />
+                                        <path d="M1.5 0A1.5 1.5 0 0 0 0 1.5v13A1.5 1.5 0 0 0 1.5 16h13a1.5 1.5 0 0 0 1.5-1.5V2.914a1.5 1.5 0 0 0-.44-1.06L14.147.439A1.5 1.5 0 0 0 13.086 0zM4 6a1 1 0 0 1-1-1V1h10v4a1 1 0 0 1-1 1zM3 9h10a1 1 0 0 1 1 1v5H2v-5a1 1 0 0 1 1-1" />
+                                    </svg>
+                                </button>
+                                <button class="btn btn-secondary" @onclick="CancelAdding">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var person in persons)
+                    {
+                        <tr>
+                            <td>@person.Id</td>
+                            @if (editingPersonId == person.Id)
+                            {
+                                <td><input type="text" @bind="editedPerson.Name" /></td>
+                                <td><input type="number" @bind="editedPerson.Age" /></td>
+                                <td>
+                                    <button class="btn btn-success" @onclick="AcceptChanges">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+                                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z" />
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-danger" @onclick="CancelChanges">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                        </svg>
+                                    </button>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>@person.Name</td>
+                                <td>@person.Age</td>
+                                <td>
+                                    <button class="btn btn-primary" @onclick="() => StartEditing(person)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
+                                        </svg>
+                                    </button>
+                                    <button class="btn btn-danger" @onclick="() => DeletePerson(person.Id)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5" />
+                                        </svg>
+                                    </button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+@code {
+    private List<Person> persons = new List<Person>();
+    private bool isLoading = true;
+    private int editingPersonId;
+    private Person editedPerson = new Person();
+    private bool isAddingNewPerson = false;
+    private Person newPerson = new Person();
+    private bool ModalVisibility = false;
+    private string ModalTitle = string.Empty;
+    private string ModalMessage = string.Empty;
+    private ModalType TypeModal = new ModalType();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await GetPersons();
+        }
+        catch (Exception ex)
+        {
+            await ShowModal("Error", $"There was an error loading the database, please try again later. {ex.Message}", ModalType.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void StartEditing(Person person)
+    {
+        editingPersonId = person.Id;
+        editedPerson = new Person { Id = person.Id, Name = person.Name, Age = person.Age };
+    }
+
+    private async Task AcceptChanges()
+    {
+        if (editedPerson.Age >= 20)
+        {
+            try
+            {
+                await PersonService.UpdatePersonAsync(editedPerson);
+                await GetPersons();
+                editingPersonId = 0;
+                await ShowModal("Success", $"User updated successfully!", ModalType.Success);
+            }
+            catch (Exception ex)
+            {
+                editingPersonId = 0;
+                await ShowModal("Error", $"There was a problem updating this user , please try again later. {ex.Message}", ModalType.Error);
+            }
+        }
+        else
+        {
+            await ShowModal("Warning", $"Please, users must be over 20 years old.", ModalType.Warning);
+        }
+    }
+
+    private void CancelChanges()
+    {
+        editingPersonId = 0;
+    }
+
+    private async Task DeletePerson(int id)
+    {
+        try
+        {
+            await PersonService.DeletePersonAsync(id);
+            await GetPersons();
+            await ShowModal("Success", $"User removed successfully!", ModalType.Success);
+        }
+        catch (Exception ex)
+        {
+            await ShowModal("Error", $"There was a problem updating this user , please try again later. {ex.Message}", ModalType.Error);
+        }
+    }
+
+    private async Task AddNewPerson()
+    {
+        if (String.IsNullOrEmpty(newPerson.Name))
+        {
+            await ShowModal("Warning", $"Please, provide a user name.", ModalType.Warning);
+        }
+        else if (newPerson.Age >= 20)
+        {
+            try
+            {
+                await PersonService.AddPersonAsync(newPerson);
+                await GetPersons();
+                CancelAdding();
+                await ShowModal("Success", $"User added successfully!", ModalType.Success);
+            }
+            catch (Exception ex)
+            {
+                await ShowModal("Error", $"There was a problem adding this user , please try again later. {ex.Message}", ModalType.Error);
+            }
+        }
+        else
+        {
+            await ShowModal("Warning", $"Please, users must be over 20 years old.", ModalType.Warning);
+        }
+    }
+
+    private void CancelAdding()
+    {
+        newPerson = new Person();
+        isAddingNewPerson = false;
+    }
+
+    private void AddingNewPerson()
+    {
+        isAddingNewPerson = !isAddingNewPerson;
+    }
+
+    private async Task GetPersons()
+    {
+        try
+        {
+            persons = await PersonService.GetPersonsAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowModal("Error", $"There was an error loading the database, please try again later. {ex.Message}", ModalType.Error);
+        }
+    }
+
+    private async Task ShowModal(string title, string message, ModalType Type)
+    {
+        ModalTitle = title;
+        ModalMessage = message;
+        TypeModal = Type;
+        ModalVisibility = true;
+        StateHasChanged();
+        await Task.Delay(5000);
+        ModalVisibility = false;
+        StateHasChanged();
+    }
+}
