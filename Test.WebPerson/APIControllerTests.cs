@@ -1,9 +1,5 @@
-using Xunit;
 using Moq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Net;
-using System.Net.Http.Json;
 using SharedLibrary.Models;
 using WebPerson.Client.Services;
 using Test.WebPerson.Service;

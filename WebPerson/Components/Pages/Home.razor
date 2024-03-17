@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using SharedLibrary.Models
 @using WebPerson.Client.Services
 
 <PageTitle>Home</PageTitle>
@@ -8,28 +7,5 @@
 
 Welcome to your new app.
 
-@if (persons != null)
-{
-    <ul>
-        @foreach (var person in persons)
-        {
-            <li>@person.Name</li>
-        }
-    </ul>
-}
-else
-{
-    <p>Loading...</p>
-}
-
 @code {
-    private List<Person> persons;
-
-    protected override async Task OnInitializedAsync()
-    {
-        persons = await PersonService.GetPersonsAsync();
-    }
-
-    [Inject]
-    private IAPIController PersonService { get; set; }
 }

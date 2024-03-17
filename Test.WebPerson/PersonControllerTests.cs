@@ -1,17 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WebApiPerson.Context;
 using WebApiPerson.Controllers;
-using Xunit;
-using Moq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace Test.WebPerson
 {
